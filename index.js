@@ -53,34 +53,29 @@ app.get('/fruits/:name', (req, res) => {
 });
 const ids = fruits.map(fruit => fruit.id)
 let maxId = Math.max(...ids)
-app.post('/fruits/:name', (req, res) => {
-    let fruitName = req.body.name.charAt(0).toUpperCase() + req.body.name.slice(1)
-    const fruit = fruits.find(fruit => fruit.name === fruitName) ?? res.status(404).send("The fruit does not exist")
-    console.log(fruit)
-    // res.send("New fruit created")
-    // res.send("New fruit created")
-})
+
+app.post("/fruits", (req, res) => {
+    // first check if a fruit with the name specified by the user already exists
+    const fruit = fruits.find((fruit) => fruit.name.toLowerCase() == req.body.name.toLowerCase());
+
+    if (fruit != undefined) {
+        // fruit already exists -> conflict response code returned
+        res.status(409).send("The fruit already exists.");
+    } else {
+        // fruit does not already exist. Increment the maxId and add it to
+        // the data sent to the server by the user
+        maxId += 1;
+        req.body.id = maxId;
+
+        // add the fruit to the list of fruits
+        fruits.push(req.body);
+
+        // Return successfully created status code
+        res.status(201).send(req.body);
+    }
+});
 
 app.listen(port, () => console.log(`App running on port: ${port}`))
 
-/*
-- Create fruit - must do
-- Challenge students to complete the POST route in pairs
-Ask students to consider:
-- How to prevent duplicate fruit
-How to create a unique ID for the new fruit - this is not for the user to specify
-What are the appropriate status codes
-How to prevent user from adding whatever data fields they want to the fruit
-Delete fruit - if they have time
-Challenge students to create a DELETE route that deletes a fruit based on its name
-Ask students to consider:
-How to deal with bad requests and fruit not found
-What are the appropriate status codes
-Update fruit - stretch challenge for personal study
-Challenge students to create a PATCH route that updates a fruit fruit based on its name
-Ask students to consider:
-How to deal with bad requests and fruit not found
-What are the appropriate status codes
-How to prevent user from adding extra data fields to the fruit
 
-*/
+
